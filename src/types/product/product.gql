@@ -48,6 +48,7 @@ input UpdateProductInput {
 extend type Query {
   products: [Product]!
   product(id: ID!): Product!
+  getData: Product!
 }
 
 extend type Mutation {

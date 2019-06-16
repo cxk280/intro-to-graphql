@@ -11,16 +11,67 @@ const types = ['product', 'coupon', 'user']
 
 export const start = async () => {
   const rootSchema = `
+    type Cat {
+      owner: Owner!
+      name: String!
+      age: Int
+    }
+
+    type Owner {
+      name: String
+      cat: Cat
+    }
+
+    type Query {
+      cat(name: String!): Cat!
+      owner(name: String!): Owner!
+    }
+
     schema {
       query: Query
-      mutation: Mutation
     }
   `
   const schemaTypes = await Promise.all(types.map(loadTypeSchema))
 
   const server = new ApolloServer({
     typeDefs: [rootSchema, ...schemaTypes],
-    resolvers: merge({}, product, coupon, user),
+    resolvers: {
+      Query: {
+        cat(_, args, ctx, info) {
+          console.log('running cat query resolver');
+          console.log('cat query resolver info object: ',info);
+          return {};
+        },
+        owner(_, args) {
+          console.log('running owner query resolver');
+          return {};
+        }
+      },
+      Cat: {
+        name() {
+          console.log('running cat name resolver');
+          return 'Daryl';
+        },
+        age() {
+          console.log('running cat age resolver');
+          return 2;
+        },
+        owner() {
+          console.log('running cat owner resolver');
+          return {};
+        }
+      },
+      Owner: {
+        name() {
+          console.log('running owner name resolver');
+          return 'Chris';
+        },
+        cat() {
+          console.log('running owner cat resolver');
+          return {};
+        }
+      }
+    },
     context({ req }) {
       // use the authenticate function from utils to auth req, its Async!
       return { user: null }
